@@ -93,6 +93,8 @@ void CameraHardware::initHeapLocked()
 
 CameraHardware::~CameraHardware()
 {
+    delete mCamera;  //jollen add
+    mCamera = 0;     //jollen add
     singleton.clear();
 }
 
@@ -270,6 +272,10 @@ status_t CameraHardware::autoFocus(autofocus_callback af_cb,
 
 int CameraHardware::pictureThread()
 {
+    mLock.lock();    // jollen add start
+        sp<MemoryBase> mem = mBuffers[mCurrentPreviewFrame];
+    mLock.unlock();  // jollen add end
+
     if (mShutterCallback)
         mShutterCallback(mPictureCallbackCookie);
 
@@ -278,9 +284,8 @@ int CameraHardware::pictureThread()
         // In the meantime just make another fake camera picture.
         int w, h;
         mParameters.getPictureSize(&w, &h);
-        sp<MemoryBase> mem = new MemoryBase(mRawHeap, 0, w * 2 * h);
-      
- //       cam.getNextFrameAsYuv422((uint8_t *)mRawHeap->base());
+        //sp<MemoryBase> mem = new MemoryBase(mRawHeap, 0, w * 2 * h);//jollen remove
+
         if (mRawPictureCallback)
             mRawPictureCallback(mem, mPictureCallbackCookie);
     }
