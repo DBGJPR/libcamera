@@ -15,7 +15,7 @@
 ** limitations under the License.
 */
 
-#define LOG_TAG "CameraHardwareStub"
+#define LOG_TAG "CameraHardware"
 #include <utils/Log.h>
 
 #include "CameraHardware.h"
@@ -27,7 +27,7 @@
 
 namespace android {
 
-CameraHardwareStub::CameraHardwareStub()
+CameraHardware::CameraHardware()
                   : mParameters(),
                     mPreviewHeap(0),
                     mRawHeap(0),
@@ -45,7 +45,7 @@ CameraHardwareStub::CameraHardwareStub()
     initDefaultParameters();
 }
 
-void CameraHardwareStub::initDefaultParameters()
+void CameraHardware::initDefaultParameters()
 {
     CameraParameters p;
 
@@ -53,7 +53,7 @@ void CameraHardwareStub::initDefaultParameters()
     p.setPreviewFrameRate(15);
     p.setPreviewFormat("yuv422sp");
 
-   
+    
     p.setPictureFormat("jpeg");
 
     if (setParameters(p) != NO_ERROR) {
@@ -61,7 +61,7 @@ void CameraHardwareStub::initDefaultParameters()
     } 
 }
 
-void CameraHardwareStub::initHeapLocked()
+void CameraHardware::initHeapLocked()
 {
     // Create raw heap.
     int picture_width, picture_height;
@@ -91,26 +91,24 @@ void CameraHardwareStub::initHeapLocked()
     }
 }
 
-CameraHardwareStub::~CameraHardwareStub()
+CameraHardware::~CameraHardware()
 {
-    delete mCamera;    // Jollen add
-    mCamera = 0;       // Jollen add
     singleton.clear();
 }
 
-sp<IMemoryHeap> CameraHardwareStub::getPreviewHeap() const
+sp<IMemoryHeap> CameraHardware::getPreviewHeap() const
 {
     return mPreviewHeap;
 }
 
-sp<IMemoryHeap> CameraHardwareStub::getRawHeap() const
+sp<IMemoryHeap> CameraHardware::getRawHeap() const
 {
     return mRawHeap;
 }
 
 // ---------------------------------------------------------------------------
 
-int CameraHardwareStub::previewThread()
+int CameraHardware::previewThread()
 {
     mLock.lock();
         // the attributes below can change under our feet...
@@ -121,9 +119,6 @@ int CameraHardwareStub::previewThread()
         ssize_t offset = mCurrentPreviewFrame * mPreviewFrameSize;
 
         sp<MemoryHeapBase> heap = mPreviewHeap;
-    
-       
-       
         
         sp<MemoryBase> buffer = mBuffers[mCurrentPreviewFrame];
         
@@ -159,7 +154,7 @@ int CameraHardwareStub::previewThread()
     return NO_ERROR;
 }
 
-status_t CameraHardwareStub::startPreview(preview_callback cb, void* user)
+status_t CameraHardware::startPreview(preview_callback cb, void* user)
 {
     Mutex::Autolock lock(mLock);
     if (mPreviewThread != 0) {
@@ -193,7 +188,7 @@ status_t CameraHardwareStub::startPreview(preview_callback cb, void* user)
     return NO_ERROR;
 }
 
-void CameraHardwareStub::stopPreview()
+void CameraHardware::stopPreview()
 {
     sp<PreviewThread> previewThread;
     
@@ -211,37 +206,37 @@ void CameraHardwareStub::stopPreview()
     mPreviewThread.clear();
 }
 
-bool CameraHardwareStub::previewEnabled() {
+bool CameraHardware::previewEnabled() {
     return mPreviewThread != 0;
 }
 
-status_t CameraHardwareStub::startRecording(recording_callback cb, void* user)
+status_t CameraHardware::startRecording(recording_callback cb, void* user)
 {
     return UNKNOWN_ERROR;
 }
 
-void CameraHardwareStub::stopRecording()
+void CameraHardware::stopRecording()
 {
 }
 
-bool CameraHardwareStub::recordingEnabled()
+bool CameraHardware::recordingEnabled()
 {
     return false;
 }
 
-void CameraHardwareStub::releaseRecordingFrame(const sp<IMemory>& mem)
+void CameraHardware::releaseRecordingFrame(const sp<IMemory>& mem)
 {
 }
 
 // ---------------------------------------------------------------------------
 
-int CameraHardwareStub::beginAutoFocusThread(void *cookie)
+int CameraHardware::beginAutoFocusThread(void *cookie)
 {
-    CameraHardwareStub *c = (CameraHardwareStub *)cookie;
+    CameraHardware *c = (CameraHardware *)cookie;
     return c->autoFocusThread();
 }
 
-int CameraHardwareStub::autoFocusThread()
+int CameraHardware::autoFocusThread()
 {
     if (mAutoFocusCallback != NULL) {
         mAutoFocusCallback(true, mAutoFocusCallbackCookie);
@@ -251,7 +246,7 @@ int CameraHardwareStub::autoFocusThread()
     return UNKNOWN_ERROR;
 }
 
-status_t CameraHardwareStub::autoFocus(autofocus_callback af_cb,
+status_t CameraHardware::autoFocus(autofocus_callback af_cb,
                                        void *user)
 {
     Mutex::Autolock lock(mLock);
@@ -267,13 +262,13 @@ status_t CameraHardwareStub::autoFocus(autofocus_callback af_cb,
     return NO_ERROR;
 }
 
-/*static*/ int CameraHardwareStub::beginPictureThread(void *cookie)
+/*static*/ int CameraHardware::beginPictureThread(void *cookie)
 {
-    CameraHardwareStub *c = (CameraHardwareStub *)cookie;
+    CameraHardware *c = (CameraHardware *)cookie;
     return c->pictureThread();
 }
 
-int CameraHardwareStub::pictureThread()
+int CameraHardware::pictureThread()
 {
     if (mShutterCallback)
         mShutterCallback(mPictureCallbackCookie);
@@ -294,7 +289,7 @@ int CameraHardwareStub::pictureThread()
     return NO_ERROR;
 }
 
-status_t CameraHardwareStub::takePicture(shutter_callback shutter_cb,
+status_t CameraHardware::takePicture(shutter_callback shutter_cb,
                                          raw_callback raw_cb,
                                          jpeg_callback jpeg_cb,
                                          void* user)
@@ -309,7 +304,7 @@ status_t CameraHardwareStub::takePicture(shutter_callback shutter_cb,
     return NO_ERROR;
 }
 
-status_t CameraHardwareStub::cancelPicture(bool cancel_shutter,
+status_t CameraHardware::cancelPicture(bool cancel_shutter,
                                            bool cancel_raw,
                                            bool cancel_jpeg)
 {
@@ -319,18 +314,18 @@ status_t CameraHardwareStub::cancelPicture(bool cancel_shutter,
     return NO_ERROR;
 }
 
-status_t CameraHardwareStub::dump(int fd, const Vector<String16>& args) const
+status_t CameraHardware::dump(int fd, const Vector<String16>& args) const
 {
     const size_t SIZE = 256;
     char buffer[SIZE];
     String8 result;
     AutoMutex lock(&mLock);
-    
+ 
     write(fd, result.string(), result.size());
     return NO_ERROR;
 }
 
-status_t CameraHardwareStub::setParameters(const CameraParameters& params)
+status_t CameraHardware::setParameters(const CameraParameters& params)
 {
     Mutex::Autolock lock(mLock);
     // XXX verify params
@@ -347,8 +342,7 @@ status_t CameraHardwareStub::setParameters(const CameraParameters& params)
 
     int w, h;
     params.getPictureSize(&w, &h);
-   
-
+    
     mParameters = params;
 
     initHeapLocked();
@@ -356,19 +350,19 @@ status_t CameraHardwareStub::setParameters(const CameraParameters& params)
     return NO_ERROR;
 }
 
-CameraParameters CameraHardwareStub::getParameters() const
+CameraParameters CameraHardware::getParameters() const
 {
     Mutex::Autolock lock(mLock);
     return mParameters;
 }
 
-void CameraHardwareStub::release()
+void CameraHardware::release()
 {
 }
 
-wp<CameraHardwareInterface> CameraHardwareStub::singleton;
+wp<CameraHardwareInterface> CameraHardware::singleton;
 
-sp<CameraHardwareInterface> CameraHardwareStub::createInstance()
+sp<CameraHardwareInterface> CameraHardware::createInstance()
 {
     if (singleton != 0) {
         sp<CameraHardwareInterface> hardware = singleton.promote();
@@ -376,14 +370,14 @@ sp<CameraHardwareInterface> CameraHardwareStub::createInstance()
             return hardware;
         }
     }
-    sp<CameraHardwareInterface> hardware(new CameraHardwareStub());
+    sp<CameraHardwareInterface> hardware(new CameraHardware());
     singleton = hardware;
     return hardware;
 }
 
 extern "C" sp<CameraHardwareInterface> openCameraHardware()
 {
-    return CameraHardwareStub::createInstance();
+    return CameraHardware::createInstance();
 }
 
 }; // namespace android

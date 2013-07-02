@@ -27,7 +27,7 @@
 
 namespace android {
 
-class CameraHardwareStub : public CameraHardwareInterface {
+class CameraHardware : public CameraHardwareInterface {
 public:
     virtual sp<IMemoryHeap> getPreviewHeap() const;
     virtual sp<IMemoryHeap> getRawHeap() const;
@@ -57,17 +57,17 @@ public:
     static sp<CameraHardwareInterface> createInstance();
 
 private:
-                        CameraHardwareStub();
-    virtual             ~CameraHardwareStub();
+                        CameraHardware();
+    virtual             ~CameraHardware();
 
     static wp<CameraHardwareInterface> singleton;
 
     static const int kBufferCount = 4;
 
     class PreviewThread : public Thread {
-        CameraHardwareStub* mHardware;
+        CameraHardware* mHardware;
     public:
-        PreviewThread(CameraHardwareStub* hw)
+        PreviewThread(CameraHardware* hw)
             : Thread(false), mHardware(hw) { }
         virtual void onFirstRef() {
             run("CameraPreviewThread", PRIORITY_URGENT_DISPLAY);
